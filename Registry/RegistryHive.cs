@@ -458,20 +458,38 @@ namespace Registry
                             continue;
                         }
 
-                        var cell = CellRecords[offset.Key];
+                        try
+                        {
+                            var cell = CellRecords[offset.Key];
 
-                        var nk = cell as NkCellRecord;
-                        nk.IsReferenced = true;
+                            var nk = cell as NkCellRecord;
+                            nk.IsReferenced = true;
 
-                        Logger.Trace("In lf or lh, found nk record at relative offset 0x{0:X}. Name: {1}", offset.Key,
-                            nk.Name);
+                            Logger.Trace("In lf or lh, found nk record at relative offset 0x{0:X}. Name: {1}", offset.Key,
+                                nk.Name);
 
-                        var tempKey = new RegistryKey(nk, key);
+                            var tempKey = new RegistryKey(nk, key);
 
-                        var sks = GetSubKeysAndValues(tempKey);
-                        tempKey.SubKeys.AddRange(sks);
+                            var sks = GetSubKeysAndValues(tempKey);
+                            tempKey.SubKeys.AddRange(sks);
 
-                        keys.Add(tempKey);
+                            keys.Add(tempKey);
+                        }
+                        catch (NullReferenceException ex)
+                        {
+                            Logger.Warn("There was an error adding sub keys and their values. Error: {0}", ex.Message);
+                            continue;
+                        }
+                        catch (ArgumentOutOfRangeException ex)
+                        {
+                            Logger.Warn("There was an error adding sub keys and their values. Error: {0}", ex.Message);
+                            continue;
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            Logger.Warn("There was an error adding sub keys and their values. Error: {0}", ex.Message);
+                            continue;
+                        }
                     }
 
                     break;
